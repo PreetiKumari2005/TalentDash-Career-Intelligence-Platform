@@ -1,19 +1,18 @@
-// app/api/calculate/route.ts
+
 import { NextResponse } from 'next/server';
-import { calculateCareerMetrics, CalculationInput } from '@/lib/calculator';
+import { calculateInHandSalary } from '@/lib/calculator';
 
 export async function POST(request: Request) {
   try {
-    const body: CalculationInput = await request.json();
+    const body = await request.json();
     
-    // Basic validation
-    if (body.experienceYears === undefined || !body.skillMatchScore) {
-      return NextResponse.json({ error: 'Missing required validation metrics' }, { status: 400 });
+    if (!body.annualCTC || isNaN(Number(body.annualCTC))) {
+      return NextResponse.json({ error: 'Valid Annual CTC is required' }, { status: 400 });
     }
 
-    const report = calculateCareerMetrics(body);
-    return NextResponse.json({ success: true, data: report });
+    const salaryReport = calculateInHandSalary(Number(body.annualCTC));
+    return NextResponse.json({ success: true, data: salaryReport });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to process metrics computation' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to process breakdown parameters' }, { status: 500 });
   }
 }
