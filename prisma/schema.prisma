@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Level {
+  L3
+  L4
+  L5
+  L6
+  SDE_I
+  SDE_II
+  SDE_III
+  STAFF
+  PRINCIPAL
+  IC4
+  IC5
+}
+
+enum Currency {
+  INR
+  USD
+  GBP
+  EUR
+}
+
+enum Source {
+  CONTRIBUTOR
+  SCRAPED
+  AI_INFERRED
+}
+
+model Company {
+  id             String   @id @default(uuid())
+  name           String
+  slug           String   @unique
+  normalizedName String
+  industry       String?
+  headquarters   String?
+  foundedYear    Int?
+  headcountRange String?
+  logoUrl        String?  // 👈 ADD THIS LINE HERE
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  salaries       Salary[]
+
+  @@index([normalizedName])
+}
+
+model Salary {
+  id                String   @id @default(uuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id])
+  role              String
+  level             Level
+  location          String
+  currency          Currency
+  experienceYears   Int
+  baseSalary        Int      // Changed from BigInt to Int
+  bonus             Int      @default(0)  // Changed from BigInt to Int
+  stock             Int      @default(0)  // Changed from BigInt to Int
+  totalCompensation Int      // Changed from BigInt to Int
+  source            Source
+  confidenceScore   Decimal  @db.Decimal(3, 2)
+  isVerified        Boolean  @default(false)
+  submittedAt       DateTime @default(now())
+
+  @@index([companyId, level, location])
+  @@index([totalCompensation])
+  @@index([submittedAt])
+  @@index([location, level])
+}

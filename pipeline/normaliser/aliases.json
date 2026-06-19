@@ -1,0 +1,15 @@
+{
+  "companies": {
+    "goog": "Google",
+    "alphabet": "Google",
+    "msft": "Microsoft",
+    "meta platforms": "Meta",
+    "fb": "Meta"
+  },
+  "roles": {
+    "sde": "Software Engineer",
+    "swe": "Software Engineer",
+    "pm": "Product Manager",
+    "ds": "Data Scientist"
+  }
+}

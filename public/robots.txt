@@ -1,0 +1,10 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Block scraping bots from hitting analytical dynamic compute pages
+Disallow: /api/
+Disallow: /compare
+
+# Establish reference to structural sitemap metadata index
+Sitemap: https://talentdash.com/sitemap.xml
