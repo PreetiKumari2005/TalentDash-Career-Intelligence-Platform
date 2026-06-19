@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { db } from '../lib/db'
-import { computeMedian } from '../lib/salary'
+import { db } from '../../lib/db'
+import { computeMedian } from '../../lib/salary'
 
 export const revalidate = 3600
 
@@ -32,7 +32,9 @@ export default async function WorkplaceIndexPage() {
             className="flex items-center justify-between px-6 py-4 border-b border-[#EBEBEB] hover:bg-[#F7F7F7] transition-colors last:border-0"
           >
             <div className="flex items-center gap-4">
-              <span className="text-lg font-bold text-[#EBEBEB] w-8">#{index + 1}</span>
+              <span className="text-lg font-bold text-[#EBEBEB] w-8">
+                #{index + 1}
+              </span>
               <div>
                 <p className="font-semibold text-[#222222]">{company.name}</p>
                 <p className="text-xs text-[#717171]">
