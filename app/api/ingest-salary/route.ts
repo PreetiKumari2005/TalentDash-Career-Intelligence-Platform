@@ -1,68 +1,82 @@
-import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { z } from "zod";
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+import { validateIngestPayload, computeTotalCompensation } from '@/lib/validation'
+import { normaliseCompanyName } from '@/lib/normalise'
+import { isDuplicate } from '@/lib/dedupe'
 
-// Strict validation contract mapping what the Python LLM pipeline extracts
-const InboundIngestionSchema = z.object({
-  companyName: z.string().min(1),
-  role: z.string().min(1),
-  level: z.string().nullable().optional(),
-  baseSalary: z.number().positive(),
-  variablePay: z.number().nonnegative().default(0),
-  equityPay: z.number().nonnegative().default(0),
-  currency: z.string().length(3).default("USD"),
-  yearsOfExp: z.number().nonnegative(),
-  location: z.string().min(2),
-  pipelineSecret: z.string()
-});
-
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-    const result = InboundIngestionSchema.safeParse(body);
+    const body = await req.json()
 
-    if (!result.success) {
-      return NextResponse.json({ success: false, error: result.error.errors }, { status: 400 });
+    // Validate
+    const error = validateIngestPayload(body)
+    if (error) {
+      return NextResponse.json(error, { status: 400 })
     }
 
-    const data = result.data;
+    // Normalise company name
+    const normalizedName = normaliseCompanyName(body.company)
 
-    // Secure pipeline-only endpoint protection hook
-    if (data.pipelineSecret !== process.env.PIPELINE_SHARED_SECRET) {
-      return NextResponse.json({ success: false, error: "Unauthorized access token payload." }, { status: 401 });
-    }
+    // Find or create company
+    let company = await db.company.findFirst({
+      where: { normalizedName },
+    })
 
-    const companySlug = data.companyName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-
-    // Atomic transaction: Find or build target company reference entity, then push normalized entry
-    const record = await db.$transaction(async (tx) => {
-      const company = await tx.company.upsert({
-        where: { slug: companySlug },
-        update: {},
-        create: { name: data.companyName, slug: companySlug }
-      });
-
-      return await tx.salary.create({
+    if (!company) {
+      company = await db.company.create({
         data: {
-          companyId: company.id,
-          role: data.role,
-          level: data.level || null,
-          baseSalary: data.baseSalary,
-          variablePay: data.variablePay,
-          equityPay: data.equityPay,
-          currency: data.currency,
-          yearsOfExp: data.yearsOfExp,
-          yearsAtCompany: 0,
-          location: data.location,
-          isVerified: true // Automatically trusted coming out of programmatic LLM pipeline
-        }
-      });
-    });
+          name: body.company.trim(),
+          slug: normalizedName,
+          normalizedName,
+        },
+      })
+    }
 
-    return NextResponse.json({ success: true, salaryId: record.id }, { status: 201 });
+    // Duplicate check
+    const duplicate = await isDuplicate({
+      companyId: company.id,
+      role: body.role,
+      level: body.level,
+      location: body.location,
+      baseSalary: body.baseSalary,
+    })
 
-  } catch (error) {
-    console.error("[PIPELINE_INGEST_ERROR]:", error);
-    return NextResponse.json({ success: false, error: "Database mapping transaction exception." }, { status: 500 });
+    if (duplicate) {
+      return NextResponse.json(
+        { error: true, message: 'Duplicate record submitted within 48 hours' },
+        { status: 409 }
+      )
+    }
+
+    // Recompute total_compensation — never trust client
+    const totalCompensation = computeTotalCompensation(body)
+
+    // Store record
+    const salary = await db.salary.create({
+      data: {
+        companyId: company.id,
+        role: body.role,
+        level: body.level,
+        location: body.location,
+        currency: body.currency,
+        experienceYears: body.experienceYears,
+        baseSalary: body.baseSalary,
+        bonus: body.bonus ?? 0,
+        stock: body.stock ?? 0,
+        totalCompensation,
+        source: body.source ?? 'CONTRIBUTOR',
+        confidenceScore: body.confidenceScore ?? 0.9,
+        isVerified: false,
+      },
+      include: { company: true },
+    })
+
+    return NextResponse.json({ error: false, data: salary }, { status: 201 })
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json(
+      { error: true, message: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }

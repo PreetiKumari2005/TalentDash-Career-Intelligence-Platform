@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import type { SalaryRecord } from '../../types/salary'
-import { formatSalary, formatDelta } from '@/lib/format'
-import { LEVEL_DISPLAY, LEVEL_BADGE_CLASS } from '@/types/enums'
+import { formatSalary, formatDelta } from '../../lib/format'
+import { LEVEL_DISPLAY, LEVEL_BADGE_CLASS } from '../../types/enums'
 
 interface CompareClientProps {
   salaries: SalaryRecord[]
