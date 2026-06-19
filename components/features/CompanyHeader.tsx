@@ -1,43 +1,74 @@
-import * as React from "react";
-import { CompanyLogo } from "@/components/ui/CompanyLogo";
-import { Badge } from "@/components/ui/Badge";
-import { Building2, Globe, MapPin } from "lucide-react";
+import Link from 'next/link'
 
-interface CompanyHeaderProps {
-  company: {
-    name: string;
-    logoUrl: string | null;
-    industry?: string | null;
-    website?: string | null;
-  };
-  salaryCount: number;
+interface Company {
+  id: string
+  name: string
+  slug: string
+  industry: string | null
+  headquarters: string | null
+  foundedYear: number | null
+  headcountRange: string | null
 }
 
-export const CompanyHeader: React.FC<CompanyHeaderProps> = ({ company, salaryCount }) => {
+interface CompanyHeaderProps {
+  company: Company
+  salaryCount?: number
+  medianTc?: number
+}
+
+export function CompanyHeader({ company, salaryCount = 0, medianTc = 0 }: CompanyHeaderProps) {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div className="bg-white border border-[#EBEBEB] rounded-xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
       <div className="flex items-center gap-4">
-        <CompanyLogo src={company.logoUrl} name={company.name} size="lg" />
+        {/* Logo placeholder */}
+        <div className="w-14 h-14 rounded-xl border border-[#EBEBEB] bg-[#F7F7F7] flex items-center justify-center flex-shrink-0">
+          <span className="text-lg font-bold text-[#717171]">
+            {company.name.slice(0, 2).toUpperCase()}
+          </span>
+        </div>
+
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{company.name}</h1>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-slate-500">
-            {company.industry && (
-              <span className="flex items-center gap-1">
-                <Building2 className="h-4 w-4" /> {company.industry}
-              </span>
+          <h1 className="text-2xl font-bold text-[#222222]">{company.name}</h1>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-[#717171]">
+            {company.industry && <span>{company.industry}</span>}
+            {company.headquarters && (
+              <>
+                <span>·</span>
+                <span>{company.headquarters}</span>
+              </>
             )}
-            {company.website && (
-              <a href={company.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-indigo-600 hover:underline">
-                <Globe className="h-4 w-4" /> Website
-              </a>
+            {company.foundedYear && (
+              <>
+                <span>·</span>
+                <span>Est. {company.foundedYear}</span>
+              </>
+            )}
+            {company.headcountRange && (
+              <>
+                <span>·</span>
+                <span>{company.headcountRange} employees</span>
+              </>
             )}
           </div>
         </div>
       </div>
-      <div className="bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-lg text-center min-w-[120px]">
-        <span className="block text-2xl font-bold text-indigo-700">{salaryCount}</span>
-        <span className="text-xs font-medium text-indigo-600 uppercase tracking-wider">Data Points</span>
+
+      <div className="flex items-center gap-3">
+        {medianTc > 0 && (
+          <div className="text-right mr-4">
+            <p className="text-xl font-bold text-[#0369A1]">
+              ₹{(medianTc / 100000).toFixed(1)}L
+            </p>
+            <p className="text-xs text-[#717171]">Median TC · {salaryCount} records</p>
+          </div>
+        )}
+        <Link
+          href={`/compare?c1=${company.slug}`}
+          className="px-4 py-2 text-sm border border-[#EBEBEB] text-[#484848] rounded hover:bg-[#F2F2F2] transition-colors"
+        >
+          Compare →
+        </Link>
       </div>
     </div>
-  );
-};
+  )
+}
