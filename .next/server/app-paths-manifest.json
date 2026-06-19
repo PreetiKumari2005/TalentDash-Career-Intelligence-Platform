@@ -1,6 +1,6 @@
 {
-  "/page": "app/page.js",
-  "/compare/page": "app/compare/page.js",
-  "/companies/page": "app/companies/page.js",
-  "/salaries/page": "app/salaries/page.js"
+  "/interviews/[slug]/page": "app/interviews/[slug]/page.js",
+  "/interviews/page": "app/interviews/page.js",
+  "/workplace-index/page": "app/workplace-index/page.js",
+  "/companies/[slug]/page": "app/companies/[slug]/page.js"
 }

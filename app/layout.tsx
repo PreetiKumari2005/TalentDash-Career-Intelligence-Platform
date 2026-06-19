@@ -15,20 +15,22 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-[#F7F7F7]">
-        <nav className="bg-white border-b border-[#EBEBEB] px-6 py-4 flex items-center justify-between sticky top-0 z-50">
-          <Link href="/" className="text-xl font-bold text-[#222222]">
-            Talent<span className="text-[#FF5A5F]">Dash</span>
-          </Link>
-          <div className="flex items-center gap-6">
-            <Link href="/salaries" className="text-sm text-[#484848] hover:text-[#222222] transition-colors">
-              Salaries
+        <nav className="bg-white border-b border-[#EBEBEB] px-6 py-3 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <Link href="/" className="text-xl font-bold text-[#222222]">
+              Talent<span className="text-[#FF5A5F]">Dash</span>
             </Link>
-            <Link href="/companies" className="text-sm text-[#484848] hover:text-[#222222] transition-colors">
-              Companies
-            </Link>
-            <Link href="/compare" className="text-sm text-[#484848] hover:text-[#222222] transition-colors">
-              Compare
-            </Link>
+            <div className="flex items-center gap-5">
+              <Link href="/companies"       className="text-sm text-[#484848] hover:text-[#222222] transition-colors">Companies</Link>
+              <Link href="/salaries"        className="text-sm text-[#484848] hover:text-[#222222] transition-colors">Salaries</Link>
+              <Link href="/reviews"         className="text-sm text-[#484848] hover:text-[#222222] transition-colors">Reviews</Link>
+              <Link href="/interviews"      className="text-sm text-[#484848] hover:text-[#222222] transition-colors">Interviews</Link>
+              <Link href="/jobs"            className="text-sm text-[#484848] hover:text-[#222222] transition-colors">Jobs</Link>
+              <Link href="/community"       className="text-sm text-[#484848] hover:text-[#222222] transition-colors">Community</Link>
+              <Link href="/tools"           className="text-sm text-[#484848] hover:text-[#222222] transition-colors">Tools</Link>
+              <Link href="/workplace-index" className="text-sm text-[#484848] hover:text-[#222222] transition-colors">Workplace Index</Link>
+              <Link href="/compare"         className="px-4 py-1.5 bg-[#FF5A5F] text-white text-sm font-medium rounded hover:bg-[#e04e53] transition-colors">Compare</Link>
+            </div>
           </div>
         </nav>
         <main>{children}</main>
