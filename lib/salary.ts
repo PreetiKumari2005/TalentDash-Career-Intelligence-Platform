@@ -1,14 +1,13 @@
 import { db } from './db'
-import type { SalaryFilters } from '@/types/salary'
-import type { Level } from '@/types/enums'
+import type { SalaryFilters } from '../types/salary'
 
 export function computeMedian(values: number[]): number {
   if (values.length === 0) return 0
   const sorted = [...values].sort((a, b) => a - b)
   const mid = Math.floor(sorted.length / 2)
   return sorted.length % 2 !== 0
-    ? sorted[mid]
-    : Math.round((sorted[mid - 1] + sorted[mid]) / 2)
+    ? sorted[mid]!
+    : Math.round((sorted[mid - 1]! + sorted[mid]!) / 2)
 }
 
 export function computeLevelDistribution(
@@ -38,14 +37,11 @@ export async function getSalaries(filters: SalaryFilters) {
 
   if (company) {
     where.company = {
-      OR: [
-        { name: { contains: company, mode: 'insensitive' } },
-        { normalizedName: { contains: company.toLowerCase() } },
-      ],
+      normalizedName: { contains: company.toLowerCase() },
     }
   }
-  if (role) where.role = { contains: role, mode: 'insensitive' }
-  if (level) where.level = level
+  if (role)     where.role     = { contains: role,     mode: 'insensitive' }
+  if (level)    where.level    = level
   if (location) where.location = { contains: location, mode: 'insensitive' }
 
   const orderBy =
@@ -73,49 +69,6 @@ export async function getSalaries(filters: SalaryFilters) {
       page,
       limit: cappedLimit,
       totalPages: Math.ceil(total / cappedLimit),
-    },
-  }
-}
-
-export async function getSalariesFromMock(filters: SalaryFilters) {
-  // Used by frontend-only mode with mock data
-  const { MOCK_SALARIES } = await import('./mock-data')
-  let results = [...MOCK_SALARIES]
-
-  if (filters.company)
-    results = results.filter((s) =>
-      s.companyName.toLowerCase().includes(filters.company!.toLowerCase())
-    )
-  if (filters.role)
-    results = results.filter((s) =>
-      s.role.toLowerCase().includes(filters.role!.toLowerCase())
-    )
-  if (filters.level) results = results.filter((s) => s.level === filters.level)
-  if (filters.location)
-    results = results.filter((s) =>
-      s.location.toLowerCase().includes(filters.location!.toLowerCase())
-    )
-
-  const sort = filters.sort ?? 'total_comp_desc'
-  results.sort((a, b) =>
-    sort === 'total_comp_asc'
-      ? a.totalCompensation - b.totalCompensation
-      : sort === 'date_desc'
-      ? new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
-      : b.totalCompensation - a.totalCompensation
-  )
-
-  const page = filters.page ?? 1
-  const limit = Math.min(filters.limit ?? 25, 100)
-  const skip = (page - 1) * limit
-
-  return {
-    data: results.slice(skip, skip + limit),
-    meta: {
-      total: results.length,
-      page,
-      limit,
-      totalPages: Math.ceil(results.length / limit),
     },
   }
 }
