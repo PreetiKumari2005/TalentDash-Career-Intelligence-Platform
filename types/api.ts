@@ -1,4 +1,5 @@
-import { ApiStatus } from './enums';
+// import { ApiStatus } from './enums';
+export enum ApiStatus { SUCCESS = 'SUCCESS', ERROR = 'ERROR', PENDING = 'PENDING' }
 
 // Generic API response structure
 export interface ApiResponse<T> {

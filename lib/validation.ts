@@ -1,5 +1,6 @@
 import { ALL_LEVELS } from '@/types/enums'
-import type { IngestPayload } from '@/types/api'
+// import type { IngestPayload } from '@/types/api'
+export interface IngestPayload { [key: string]: any; }
 
 export interface ValidationError {
   error: true

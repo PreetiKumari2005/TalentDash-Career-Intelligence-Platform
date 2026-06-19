@@ -19,7 +19,7 @@ export const MedianBadge: React.FC<MedianBadgeProps> = ({ amount, currency }) =>
         <span className="text-xs uppercase tracking-wider font-semibold text-slate-400 block">Median Pay</span>
         <span className="text-lg font-bold text-slate-900 font-mono">{formatted}</span>
       </div>
-      <Badge variant="outline" className="h-max text-[10px] bg-white">Market Core</Badge>
+      <Badge variant="gray" className="h-max text-[10px] bg-white">Market Core</Badge>
     </div>
   );
 };
