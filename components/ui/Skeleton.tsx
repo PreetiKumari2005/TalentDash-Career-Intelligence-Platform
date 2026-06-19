@@ -7,7 +7,7 @@ export function SalaryTableSkeleton() {
     <div className="w-full">
       <div className="flex gap-3 mb-6">
         {[200, 150, 120, 150].map((w, i) => (
-          <Skeleton key={i} className="h-9" style={{ width: w } as React.CSSProperties} />
+          <Skeleton key={i} className={`h-9 w-[${w}px]`} />
         ))}
       </div>
       {Array.from({ length: 10 }).map((_, i) => (
