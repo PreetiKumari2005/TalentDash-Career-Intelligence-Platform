@@ -1,41 +1,35 @@
-import * as React from "react";
-import Link from "next/link";
-import { HelpCircle, ChevronRight, HelpCircle as HelpIcon } from "lucide-react";
-import { db } from "@/lib/db";
+import Link from 'next/link'
+import { db } from '../lib/db'
 
-export default async function InterviewsRootPage() {
-  const targets = await db.company.findMany({
-    take: 5,
-    select: { name: true, slug: true }
-  });
+export const revalidate = 3600
+
+export default async function InterviewsPage() {
+  const companies = await db.company.findMany({
+    orderBy: { name: 'asc' },
+    select: { id: true, name: true, slug: true, industry: true },
+  })
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Interview Technical Debriefs</h1>
-        <p className="text-sm text-slate-500">Review precise design tasks and algorithm hurdles experienced by real candidates.</p>
-      </div>
-
-      <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100 shadow-sm overflow-hidden">
-        {targets.map((item) => (
-          <Link 
-            key={item.slug}
-            href={`/interviews/${item.slug}`} 
-            className="p-4 flex items-center justify-between hover:bg-slate-50/60 transition group"
+    <div className="max-w-4xl mx-auto px-6 py-10">
+      <h1 className="text-3xl font-bold text-[#222222] mb-2">Interview Experiences</h1>
+      <p className="text-[#717171] mb-8">Real interview experiences by company and role</p>
+      <div className="grid grid-cols-1 gap-3">
+        {companies.map((c) => (
+          <Link
+            key={c.id}
+            href={`/interviews/${c.slug}`}
+            className="bg-white rounded-xl border border-[#EBEBEB] px-5 py-4 hover:shadow-md transition-shadow flex items-center justify-between"
           >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                <HelpIcon className="h-4 w-4" />
-              </div>
-              <div>
-                <span className="font-semibold text-slate-800 block group-hover:text-indigo-600 transition">{item.name} Preparation Portal</span>
-                <span className="text-xs text-slate-400">Systems design, live loops, and behavioral matching loops</span>
-              </div>
+            <div>
+              <span className="font-medium text-[#222222]">{c.name}</span>
+              {c.industry && (
+                <span className="ml-3 text-xs text-[#717171]">{c.industry}</span>
+              )}
             </div>
-            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 transition" />
+            <span className="text-[#FF5A5F] text-sm">View →</span>
           </Link>
         ))}
       </div>
     </div>
-  );
+  )
 }
